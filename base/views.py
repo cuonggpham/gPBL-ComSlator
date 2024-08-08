@@ -6,7 +6,9 @@ from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
 from .models import Room, Topic, Message, User
 from .forms import RoomForm, UserForm, MyUserCreationForm
-
+from googletrans import Translator
+from .languages import LANGUAGES
+from django.http import JsonResponse
 # Create your views here.
 
 # rooms = [
@@ -205,3 +207,18 @@ def topicsPage(request):
 def activityPage(request):
     room_messages = Message.objects.all()
     return render(request, 'base/activity.html', {'room_messages': room_messages})
+
+
+
+def translation(request):
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        source_language = request.POST.get('source_language')
+        target_language = request.POST.get('target_language')
+        
+        translation = Translator()
+        
+        result = translation.translate(text, src=source_language, dest=target_language)
+        
+        return JsonResponse({'translate_text': result.text})
+    return render(request, 'base/translation.html', {'languages': LANGUAGES})

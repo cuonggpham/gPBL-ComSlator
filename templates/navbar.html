@@ -22,6 +22,9 @@
         <input name="q" placeholder="Search for posts" />
       </label>
     </form>
+    <a class="btn btn--pill" type="button" href="{% url 'translate_text' %}">
+      Translate
+    </a>
     <nav class="header__menu">
       <!-- Logged In -->
       {% if request.user.is_authenticated %}
