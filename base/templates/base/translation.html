@@ -1,0 +1,73 @@
+{% extends 'main.html' %} {% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .text-box {
+    width: 45%;
+  }
+  textarea {
+    width: 100%;
+    height: 200px;
+  }
+  select,
+  button {
+    margin-top: 10px;
+  }
+</style>
+
+<div class="container">
+  <h1>Translate Text</h1>
+  <div class="container">
+    <div class="text-box">
+      <label for="source_language">Source Language:</label>
+      <select id="source_language" name="source_language">
+        {% for code, language in languages.items %}
+        <option value="{{ code }}">{{ language }}</option>
+        {% endfor %}
+      </select>
+      <label for="text">Text to translate:</label>
+      <textarea id="text" name="text"></textarea>
+    </div>
+    <div class="text-box">
+      <label for="target_language">Target Language:</label>
+      <select id="target_language" name="target_language">
+        {% for code, language in languages.items %}
+        <option value="{{ code }}">{{ language }}</option>
+        {% endfor %}
+      </select>
+      <label for="translated_text">Translated Text:</label>
+      <textarea id="translated_text" name="translated_text" readonly></textarea>
+    </div>
+  </div>
+  <button id="translate-button">Translate</button>
+</div>
+<script>
+  $(document).ready(function () {
+    $("#translate-button").on("click", function (event) {
+      event.preventDefault();
+
+      $.ajax({
+        url: "{% url 'translate_text' %}",
+        type: "POST",
+        data: {
+          text: $("#text").val(),
+          source_language: $("#source_language").val(),
+          target_language: $("#target_language").val(),
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+        },
+        success: function (response) {
+          $("#translated_text").val(response.translate_text);
+        },
+        error: function (xhr, errmsg, err) {
+          console.log(xhr.status + ": " + xhr.responseText);
+        },
+      });
+    });
+  });
+</script>
+{% endblock content %}
