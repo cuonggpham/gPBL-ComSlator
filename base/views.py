@@ -34,6 +34,7 @@ def loginPage(request):
 
         if user is not None:
             login(request, user)
+            user.status = 'online'
             return redirect('home')
         else:
             messages.error(request, 'Username OR password does not exit')
@@ -44,6 +45,7 @@ def loginPage(request):
 
 def logoutUser(request):
     logout(request)
+    User.status = 'offline'
     return redirect('home')
 
 
