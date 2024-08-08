@@ -1,62 +1,90 @@
 # Comslator
 
-Member:
-UNO TOMOKI
-KOTAKI NAOSHIGE
-PHAM QUOC CUONG
-TRAN CAO BAO PHUC
-NGUYEN MANH QUAN
 
-### Cloning the repository
+## Table of Contents
 
---> Clone the repository using the command below :
+- [Contributors](#contributors)
+- [Introduction](#introduction)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Running the App](#running-the-app)
 
-```bash
-git clone https://github.com/AL23075/Comslator.git
 
-```
+## Contributors
 
---> Move into the directory where we have the project files :
+- [UNO TOMOKI](https://github.com/AL23075)
+- [KOTAKI NAOSHIGE]()
+- [PHAM QUOC CUONG](https://github.com/cuonggpham)
+- [TRAN CAO BAO PHUC](https://github.com/Phuctran11)
+- [NGUYEN MANH QUAN](https://github.com/Kuan-niisan)
 
-```bash
-cd StudyBud
+## Introduction
 
-```
+Comslator is a web application designed to provide real-time translation and other AI-powered features. The project is developed by a team of students as part of their coursework and aims to enhance language learning and communication.
 
---> Create a virtual environment :
+## Features
 
-```bash
-# Let's install virtualenv first
-pip install virtualenv
+- Real-time translation between Japanese and Vietnamese.
+- AI-powered functionalities integrated into the website.
+- User-friendly interface.
 
-# Then we create our virtual environment
-virtualenv envname
+## Requirements
 
-```
+- Python 3.x
+- Django
+- Virtualenv
 
---> Activate the virtual environment :
+## Installation
 
-```bash
-envname\scripts\activate
+Follow these steps to set up the project on your local machine:
 
-```
+# Clone the repository using the command below:
 
---> Install the requirements :
+    
+    git clone https://github.com/AL23075/Comslator.git
+    
 
-```bash
-pip install -r requirements.txt
+# Move into the directory where the project files are located:
 
-```
+    
+    cd Comslator
+    
 
-#
+# Create a virtual environment:
 
-### Running the App
+    
+    # Let's install virtualenv first
+    pip install virtualenv
 
---> To run the App, we use :
+    # Then we create our virtual environment
+    virtualenv envname
+    
 
-```bash
-python manage.py runserver
+# Activate the virtual environment:
 
-```
+    
+    # On Windows
+    envname\scripts\activate
 
-> ⚠ Then, the development server will be started at http://127.0.0.1:8000/
+    # On Unix or MacOS
+    source envname/bin/activate
+    
+
+# Install the required packages:
+
+    
+    pip install -r requirements.txt
+   
+
+## Running the App
+
+
+  To run the app, use the following command:
+
+
+    python manage.py runserver
+
+> Then, the development server will be started at http://127.0.0.1:8000/.
+
+
