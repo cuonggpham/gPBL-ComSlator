@@ -28,8 +28,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     STATUS = [
-        ('online', 'on_line'),
-        ('offline', 'off_line'),
+        ('online', 'online'),
+        ('offline', 'offline'),
     ]
     name = models.CharField(max_length=200, null=True)
     username   = models.CharField(max_length=200, null=True)
