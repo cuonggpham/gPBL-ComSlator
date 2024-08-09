@@ -1,14 +1,19 @@
 {% extends 'main.html' %} {% block content %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <style>
-  .container {
+  .translation-container {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
   }
+  .text-box-container {
+    display: flex;
+    justify-content: center;
+    width: 80%; /* Adjust width to control space from left and right */
+  }
   .text-box {
-    width: 45%;
+    width: 50%; /* Make boxes occupy full width together */
   }
   textarea {
     width: 100%;
@@ -18,11 +23,34 @@
   button {
     margin-top: 10px;
   }
+  h1 {
+    text-align: center;
+    font-size: 3rem;
+  }
+  .translate-button {
+    background-color: white; /* Match with the navbar button color */
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .translate-button:hover {
+    background-color: #357abd; /* Darker shade on hover */
+  }
+
+  .translate-button:focus {
+    outline: none;
+  }
 </style>
 
-<div class="container">
-  <h1>Translate Text</h1>
-  <div class="container">
+<div class="translation-container">
+  <h1>Translation Tool</h1>
+  <div class="text-box-container">
     <div class="text-box">
       <label for="source_language">Source Language:</label>
       <select id="source_language" name="source_language">
@@ -30,7 +58,6 @@
         <option value="{{ code }}">{{ language }}</option>
         {% endfor %}
       </select>
-      <label for="text">Text to translate:</label>
       <textarea id="text" name="text"></textarea>
     </div>
     <div class="text-box">
@@ -40,11 +67,10 @@
         <option value="{{ code }}">{{ language }}</option>
         {% endfor %}
       </select>
-      <label for="translated_text">Translated Text:</label>
       <textarea id="translated_text" name="translated_text" readonly></textarea>
     </div>
   </div>
-  <button id="translate-button">Translate</button>
+  <button class="translate-button" id="translate-button">Translate</button>
 </div>
 <script>
   $(document).ready(function () {
