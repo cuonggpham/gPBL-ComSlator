@@ -9,6 +9,9 @@ from .forms import RoomForm, UserForm, MyUserCreationForm
 from googletrans import Translator
 from .languages import LANGUAGES
 from django.http import JsonResponse
+from .models import Message
+from django.shortcuts import get_object_or_404
+
 # Create your views here.
 
 # rooms = [
@@ -222,3 +225,19 @@ def translation(request):
         
         return JsonResponse({'translate_text': result.text})
     return render(request, 'base/translation.html', {'languages': LANGUAGES})
+
+translator = Translator()
+
+def translate_message(request, message_id, target_lang):
+    message = Message.objects.get(id=message_id)
+    translated_text = translator.translate(message.body, dest=target_lang).text
+    message.translated_body = translated_text
+    message.save()
+    return JsonResponse({'translated_text': translated_text})
+
+def restore_message(request, message_id):
+    message = Message.objects.get(id=message_id)
+    original_text = message.body
+    message.translated_body = None
+    message.save()
+    return JsonResponse({'original_text': original_text})
