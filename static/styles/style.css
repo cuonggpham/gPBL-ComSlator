@@ -1171,3 +1171,37 @@ a {
   color: var(--color-main);
   font-weight: 1.4rem;
 }
+
+.options__menu {
+  display: none;
+  position: absolute;
+  top: 100%; /* Điều chỉnh top để tránh bị che khuất */
+  left: 0; /* Đảm bảo menu nằm ngay dưới nút tùy chọn */
+  z-index: 1000; /* Tăng z-index để menu luôn hiện trên cùng */
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  min-width: 200x; /* Đảm bảo độ rộng tối thiểu của menu */
+  overflow: visible;
+}
+
+.options__menu.show {
+  display: block;
+}
+
+.options__menu a {
+  display: block;
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+}
+
+.options__menu a:hover {
+  background: #f1f1f1;
+}
+
+.thread__options {
+  position: relative;
+  display: inline-block; /* Thay đổi thành inline-block để tránh bị tràn */
+}
