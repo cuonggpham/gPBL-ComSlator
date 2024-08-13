@@ -205,37 +205,7 @@
   </div>
 </main>
 
-<script src="js/script.js">
-  $(document).ready(function () {
-    $("#chat-input").on("input", function () {
-      var input = $(this).val();
-      if (input === "/b") {
-        $("#time-input-form").show();
-      } else {
-        $("#time-input-form").hide();
-      }
-    });
-  });
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    $.ajax({
-      url: "{% url 'set-timezone' %}",
-      type: "POST",
-      data: {
-        timezone: timezone,
-        csrfmiddlewaretoken: "{{ csrf_token }}",
-      },
-      success: function (response) {
-        console.log("Timezone set to:", response.timezone);
-      },
-      error: function (xhr, status, error) {
-        console.error("Error setting timezone:", error);
-      },
-    });
-  });
-
+<script>
   function toggleOptions(element) {
     const menu = element.nextElementSibling;
     menu.classList.toggle("show");
@@ -266,6 +236,36 @@
         .querySelectorAll(".options__menu")
         .forEach((menu) => menu.classList.remove("show"));
     }
+  });
+
+  $(document).ready(function () {
+    $("#chat-input").on("input", function () {
+      var input = $(this).val();
+      if (input === "/b") {
+        $("#time-input-form").show();
+      } else {
+        $("#time-input-form").hide();
+      }
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    $.ajax({
+      url: "{% url 'set-timezone' %}",
+      type: "POST",
+      data: {
+        timezone: timezone,
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+      },
+      success: function (response) {
+        console.log("Timezone set to:", response.timezone);
+      },
+      error: function (xhr, status, error) {
+        console.error("Error setting timezone:", error);
+      },
+    });
   });
 </script>
 
