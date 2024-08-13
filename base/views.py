@@ -6,6 +6,11 @@ from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
 from .models import Room, Topic, Message, User
 from .forms import RoomForm, UserForm, MyUserCreationForm
+from googletrans import Translator
+from .languages import LANGUAGES
+from django.http import JsonResponse
+from .models import Message
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 
@@ -34,6 +39,7 @@ def loginPage(request):
 
         if user is not None:
             login(request, user)
+            user.status = 'online'
             return redirect('home')
         else:
             messages.error(request, 'Username OR password does not exit')
@@ -44,6 +50,7 @@ def loginPage(request):
 
 def logoutUser(request):
     logout(request)
+    User.status = 'offline'
     return redirect('home')
 
 
@@ -88,6 +95,7 @@ def room(request, pk):
     room_messages = room.message_set.all()
     participants = room.participants.all()
 
+    
     if request.method == 'POST':
         message = Message.objects.create(
             user=request.user,
@@ -202,3 +210,34 @@ def topicsPage(request):
 def activityPage(request):
     room_messages = Message.objects.all()
     return render(request, 'base/activity.html', {'room_messages': room_messages})
+
+
+
+def translation(request):
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        source_language = request.POST.get('source_language')
+        target_language = request.POST.get('target_language')
+        
+        translation = Translator()
+        
+        result = translation.translate(text, src=source_language, dest=target_language)
+        
+        return JsonResponse({'translate_text': result.text})
+    return render(request, 'base/translation.html', {'languages': LANGUAGES})
+
+translator = Translator()
+
+def translate_message(request, message_id, target_lang):
+    message = Message.objects.get(id=message_id)
+    translated_text = translator.translate(message.body, dest=target_lang).text
+    message.translated_body = translated_text
+    message.save()
+    return JsonResponse({'translated_text': translated_text})
+
+def restore_message(request, message_id):
+    message = Message.objects.get(id=message_id)
+    original_text = message.body
+    message.translated_body = None
+    message.save()
+    return JsonResponse({'original_text': original_text})

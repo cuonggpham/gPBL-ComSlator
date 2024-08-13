@@ -19,4 +19,9 @@ urlpatterns = [
 
     path('topics/', views.topicsPage, name="topics"),
     path('activity/', views.activityPage, name="activity"),
+    
+    path('translate/', views.translation, name="translate_text"),
+
+    path('translate-message/<int:message_id>/<str:target_lang>/', views.translate_message, name='translate-message'),
+    path('restore-message/<int:message_id>/', views.restore_message, name='restore-message'),
 ]

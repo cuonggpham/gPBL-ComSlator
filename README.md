@@ -1,4 +1,4 @@
-# Comslator
+# ComSlator
 
 
 ## Table of Contents
@@ -21,7 +21,7 @@
 
 ## Introduction
 
-Comslator is a web application designed to provide real-time translation and other AI-powered features. The project is developed by a team of students as part of their coursework and aims to enhance language learning and communication.
+ComSlator is a web application designed to provide real-time translation and other AI-powered features. The project is developed by a team of students as part of their coursework and aims to enhance language learning and communication.
 
 ## Features
 

@@ -1,0 +1,99 @@
+{% extends 'main.html' %} {% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+  .translation-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  .text-box-container {
+    display: flex;
+    justify-content: center;
+    width: 80%; /* Adjust width to control space from left and right */
+  }
+  .text-box {
+    width: 50%; /* Make boxes occupy full width together */
+  }
+  textarea {
+    width: 100%;
+    height: 200px;
+  }
+  select,
+  button {
+    margin-top: 10px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 3rem;
+  }
+  .translate-button {
+    background-color: white; /* Match with the navbar button color */
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .translate-button:hover {
+    background-color: #357abd; /* Darker shade on hover */
+  }
+
+  .translate-button:focus {
+    outline: none;
+  }
+</style>
+
+<div class="translation-container">
+  <h1>Translation Tool</h1>
+  <div class="text-box-container">
+    <div class="text-box">
+      <label for="source_language">Source Language:</label>
+      <select id="source_language" name="source_language">
+        {% for code, language in languages.items %}
+        <option value="{{ code }}">{{ language }}</option>
+        {% endfor %}
+      </select>
+      <textarea id="text" name="text"></textarea>
+    </div>
+    <div class="text-box">
+      <label for="target_language">Target Language:</label>
+      <select id="target_language" name="target_language">
+        {% for code, language in languages.items %}
+        <option value="{{ code }}">{{ language }}</option>
+        {% endfor %}
+      </select>
+      <textarea id="translated_text" name="translated_text" readonly></textarea>
+    </div>
+  </div>
+  <button class="translate-button" id="translate-button">Translate</button>
+</div>
+<script>
+  $(document).ready(function () {
+    $("#translate-button").on("click", function (event) {
+      event.preventDefault();
+
+      $.ajax({
+        url: "{% url 'translate_text' %}",
+        type: "POST",
+        data: {
+          text: $("#text").val(),
+          source_language: $("#source_language").val(),
+          target_language: $("#target_language").val(),
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+        },
+        success: function (response) {
+          $("#translated_text").val(response.translate_text);
+        },
+        error: function (xhr, errmsg, err) {
+          console.log(xhr.status + ": " + xhr.responseText);
+        },
+      });
+    });
+  });
+</script>
+{% endblock content %}
