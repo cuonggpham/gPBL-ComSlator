@@ -22,3 +22,7 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['avatar', 'name', 'username', 'email', 'bio', 'birth_date']
+        
+class SummarizeForm(forms.Form):
+    start_time = forms.DateTimeField(widget=forms.TextInput(attrs={'type': 'datetime-local'}))
+    end_time = forms.DateTimeField(widget=forms.TextInput(attrs={'type': 'datetime-local'}))

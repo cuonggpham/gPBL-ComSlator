@@ -1,4 +1,6 @@
-{% extends 'main.html' %} {% block content %}
+{% extends 'main.html' %} {% block content %} {% load tz %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 <main class="profile-page layout layout--2">
   <div class="container">
     <!-- Room Start -->
@@ -86,17 +88,13 @@
               <span>@{{room.host.username}}</span>
             </a>
           </div>
-          <!-- <div class="room__details">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quasi, tenetur laudantium? Dicta repellendus
-            rerum consectetur, voluptatem repudiandae eum ea porro cupiditate provident nulla, deserunt, ab ipsum
-            corporis laboriosam deleniti molestias?
-          </div> -->
           <span class="room__topics">{{room.topic}}</span>
         </div>
 
         <div class="room__conversation">
           <div class="threads scroll">
             {% for message in room_messages %}
+
             <div class="thread">
               <div class="thread__top">
                 <div class="thread__author">
@@ -109,11 +107,11 @@
                     </div>
                     <span>@{{message.user.username}}</span>
                   </a>
+
                   <span class="thread__date"
-                    >{{message.created|timesince}} ago</span
+                    >{{message.created|localtime}}</span
                   >
                 </div>
-
                 <div class="thread__options">
                   <svg
                     class="options__icon"
@@ -160,10 +158,25 @@
           </div>
         </div>
       </div>
+
       <div class="room__message">
-        <form action="" method="POST">
+        <form action="" method="POST" id="message-form">
           {% csrf_token %}
-          <input name="body" placeholder="Write your message here..." />
+          <input
+            id="chat-input"
+            name="body"
+            placeholder="Write your message here..."
+            autocomplete="off"
+          />
+          <div id="time-input-form" style="display: none; margin-top: 10px">
+            <label for="start-time">Start Time:</label>
+            <input type="datetime-local" id="start-time" name="start_time" />
+
+            <label for="end-time">End Time:</label>
+            <input type="datetime-local" id="end-time" name="end_time" />
+
+            <button type="submit">Submit</button>
+          </div>
         </form>
       </div>
     </div>
@@ -191,7 +204,38 @@
     <!--  End -->
   </div>
 </main>
-<script>
+
+<script src="js/script.js">
+  $(document).ready(function () {
+    $("#chat-input").on("input", function () {
+      var input = $(this).val();
+      if (input === "/b") {
+        $("#time-input-form").show();
+      } else {
+        $("#time-input-form").hide();
+      }
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    $.ajax({
+      url: "{% url 'set-timezone' %}",
+      type: "POST",
+      data: {
+        timezone: timezone,
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+      },
+      success: function (response) {
+        console.log("Timezone set to:", response.timezone);
+      },
+      error: function (xhr, status, error) {
+        console.error("Error setting timezone:", error);
+      },
+    });
+  });
+
   function toggleOptions(element) {
     const menu = element.nextElementSibling;
     menu.classList.toggle("show");
@@ -224,5 +268,5 @@
     }
   });
 </script>
-<script src="js/script.js"></script>
+
 {% endblock content %}
