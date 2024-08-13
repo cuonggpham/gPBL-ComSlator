@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.base_user import AbstractBaseUser
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password=None):
         if not email:
@@ -40,6 +41,7 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     bio = models.TextField(null=True)
     avatar = models.ImageField(null=True, default="avatar.svg")
+    timezone = models.CharField(max_length=50, default='UTC')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'password']

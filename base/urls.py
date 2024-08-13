@@ -24,4 +24,8 @@ urlpatterns = [
 
     path('translate-message/<int:message_id>/<str:target_lang>/', views.translate_message, name='translate-message'),
     path('restore-message/<int:message_id>/', views.restore_message, name='restore-message'),
+    path('set-timezone/', views.set_timezone, name='set-timezone'),
+    
+    # path('handle-bot-command/', views.handle_bot_command, name='handle-bot-command'),
+    # path('command-suggestions/', views.command_suggestions, name='command_suggestions'),
 ]

@@ -1208,3 +1208,23 @@ a {
   position: relative;
   display: inline-block;
 }
+
+.suggestions-box {
+  border: 1px solid #ccc;
+  background: rgb(105, 109, 151);
+  max-height: 500px;
+  overflow-y: auto;
+  margin-bottom: 2rem;
+  display: none;
+  cursor: pointer;
+}
+
+.suggestion-item {
+  padding: 1rem
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
