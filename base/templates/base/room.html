@@ -1,4 +1,4 @@
-{% extends 'main.html' %} {% block content %} {% load tz %}
+{% extends 'main.html' %} {% block content %} {% load tz %} {% load static %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <main class="profile-page layout layout--2">
@@ -22,6 +22,25 @@
             </svg>
           </a>
           <h3>Study Room</h3>
+        </div>
+
+        <div>
+          <a
+            href="{% url 'task_view' room.id %}"
+            class="btn btn-primary task-btn"
+          >
+            <i class="fas fa-tasks"></i>
+          </a>
+        </div>
+
+        <div>
+          {% if request.user in room.participants.all %}
+          <a href="{% url 'call_room' room.id %}" class="btn btn-primary">
+            <i class="bi bi-telephone"></i>
+          </a>
+          {% else %}
+          <p>You have to become a participant in this room.</p>
+          {% endif %}
         </div>
         {% if room.host == request.user %}
         <div class="room__topRight">
@@ -113,13 +132,29 @@
                   >
                 </div>
                 <div class="thread__options">
+                  {% if request.user == message.user %}
+                  <a href="{% url 'delete-message' message.id %}">
+                    <svg
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 32 32"
+                    >
+                      <title>remove</title>
+                      <path
+                        d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"
+                      ></path>
+                    </svg>
+                  </a>
+                  {% endif %}
                   <svg
                     class="options__icon"
                     version="1.1"
                     xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 32 32"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
                     onclick="toggleOptions(this)"
                   >
                     <title>more-options</title>
@@ -127,6 +162,7 @@
                       d="M16 22.286q-1.179 0-2.016-0.839t-0.839-2.016 0.839-2.016 2.016-0.839 2.016 0.839 0.839 2.016-0.839 2.016-2.016 0.839zM16 13.714q-1.179 0-2.016-0.839t-0.839-2.016 0.839-2.016 2.016-0.839 2.016 0.839 0.839 2.016-0.839 2.016-2.016 0.839zM16 5.143q-1.179 0-2.016-0.839t-0.839-2.016 0.839-2.016 2.016-0.839 2.016 0.839 0.839 2.016-0.839 2.016-2.016 0.839z"
                     ></path>
                   </svg>
+
                   <div class="options__menu">
                     <a
                       href="#"
@@ -150,7 +186,11 @@
                 </div>
               </div>
               <div class="thread__details" id="message-{{message.id}}">
-                {{message.displayed_body}}
+                {{message.displayed_body}} {% if message.image %}
+                <div class="summary-image">
+                  <img src="{% static message.image %}" alt="Generated Image" />
+                </div>
+                {% endif %}
               </div>
             </div>
 
@@ -162,6 +202,24 @@
       <div class="room__message">
         <form action="" method="POST" id="message-form">
           {% csrf_token %}
+          <div
+            id="command-suggestions"
+            style="
+              display: none;
+              position: absolute;
+              bottom: 60px;
+              left: 0;
+              background-color: white;
+              border: 1px solid #ccc;
+              width: 100%;
+              z-index: 10;
+            "
+          >
+            <ul
+              id="suggestions-list"
+              style="list-style-type: none; padding: 10px"
+            ></ul>
+          </div>
           <input
             id="chat-input"
             name="body"
@@ -239,8 +297,40 @@
   });
 
   $(document).ready(function () {
+    const commandSuggestions = $("#command-suggestions");
+    const suggestionsList = $("#suggestions-list");
+
     $("#chat-input").on("input", function () {
       var input = $(this).val();
+
+      if (input.startsWith("/")) {
+        $.ajax({
+          url: "{% url 'get_commands' %}",
+          method: "GET",
+          success: function (commands) {
+            suggestionsList.empty();
+            commands.ForEach(function (command) {
+              suggestionsList.append(
+                `<li data-command="${command.command}">${command.command} - ${command.description}</li>`
+              );
+            });
+            $("#command-suggestions").show();
+          },
+        });
+      } else {
+        $("#command-suggestions").hide();
+      }
+      // Handle suggestion click
+      suggestionsList.on("click", "li", function () {
+        const command = $(this).data("command");
+        $("#chat-input").val(command + " ");
+        commandSuggestions.hide();
+      });
+      $(document).on("click", function (e) {
+        if (!$(e.target).closest("#command-suggestions, #chat-input").length) {
+          commandSuggestions.hide();
+        }
+      });
       if (input === "/b") {
         $("#time-input-form").show();
       } else {

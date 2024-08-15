@@ -26,6 +26,10 @@ urlpatterns = [
     path('restore-message/<int:message_id>/', views.restore_message, name='restore-message'),
     path('set-timezone/', views.set_timezone, name='set-timezone'),
     
-    # path('handle-bot-command/', views.handle_bot_command, name='handle-bot-command'),
-    # path('command-suggestions/', views.command_suggestions, name='command_suggestions'),
+    path('room/<int:room_id>/tasks/', views.task_view, name='task_view'),
+    path('tasks/toggle/<int:task_id>/', views.toggle_task, name='toggle_task'),
+    path('tasks/delete/<int:task_id>/', views.delete_task, name='delete_task'),
+    
+    path('call-room/<int:room_id>/', views.callRoom, name='call_room'),
+    path('get-commands/', views.get_commands, name='get_commands'),
 ]

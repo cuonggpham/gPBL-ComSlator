@@ -4,19 +4,25 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
-from .models import Room, Topic, Message, User
+from .models import Room, Topic, Message, User, Task
 from .forms import RoomForm, UserForm, MyUserCreationForm, SummarizeForm
 from googletrans import Translator
 from .languages import LANGUAGES
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from .models import Message
 from django.shortcuts import get_object_or_404
-
 from django.views.decorators.csrf import csrf_exempt
 from transformers import pipeline
+
+
+from diffusers import StableDiffusionPipeline
+from django.conf import settings
+import re, os
+
 from django.utils import timezone
 import pytz
 
+import uuid
 
 def loginPage(request):
     page = 'login'
@@ -93,6 +99,13 @@ def home(request):
                'room_count': room_count, 'room_messages': room_messages}
     return render(request, 'base/home.html', context)
 
+# Load the summarization pipeline and Stable Diffusion pipeline
+os.environ["HUGGINGFACE_TOKEN"] = "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"
+image_model = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", use_auth_token=os.getenv('HUGGINGFACE_TOKEN'))
+image_model.to("cpu")
+
+# Set summarizer to CPU
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=-1, clean_up_tokenization_spaces=False)
 
 @login_required(login_url='login')
 def room(request, pk):
@@ -132,13 +145,16 @@ def room(request, pk):
                 end_time_utc = end_time.astimezone(pytz.UTC)
 
                 summary = summarize_chat(room_messages, start_time_utc, end_time_utc)
-
+                
+                relative_image_path = generate_image_from_summary(summary)
+                
                 Message.objects.create(
                     user=request.user,
                     room=room,
-                    body=f"Summary:\n{summary}"
+                    body=f"Summary:\n{summary}",
+                    image=relative_image_path,
                 )
-                return redirect('room', pk=room.id)
+            return redirect('room', pk=room.id)
         else:  # Regular message
             message = Message.objects.create(
                 user=request.user,
@@ -158,9 +174,6 @@ def room(request, pk):
         'form': form,
     }
     return render(request, 'base/room.html', context)
-
-# Load the summarization pipeline once when the server starts
-summarizer = pipeline("summarization")
 
 def summarize_chat(messages, start_time, end_time):
     # Convert to timezone-aware datetime if needed
@@ -188,6 +201,27 @@ def summarize_chat(messages, start_time, end_time):
     except Exception as e:
         return f"Error summarizing content: {str(e)}"
     
+def generate_image_from_summary(summary):
+    max_length = 128  # Example maximum length
+    sanitized_summary = re.sub(r'[\\/:*?"<>|,]+', '', summary)
+    truncated_summary = sanitized_summary[:max_length]
+    filename = re.sub(r'\s+', '_', truncated_summary) + '.png'
+    save_dir = os.path.join(settings.BASE_DIR, 'static', 'images')
+    
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+        
+    outputfile = os.path.join(save_dir, filename)
+    
+    # Generate the image
+    image = image_model(summary, num_inference_steps=500)["images"][0]
+    
+    # Save the image
+    image.save(outputfile)
+    
+    # Return the relative URL
+    return f'images/{filename}'
+
 
 def userProfile(request, pk):
     user = User.objects.get(id=pk)
@@ -207,12 +241,14 @@ def createRoom(request):
         topic_name = request.POST.get('topic')
         topic, created = Topic.objects.get_or_create(name=topic_name)
 
-        Room.objects.create(
+        room = Room.objects.create(
             host=request.user,
             topic=topic,
             name=request.POST.get('name'),
             description=request.POST.get('description'),
         )
+
+        room.participants.add(request.user)
         return redirect('home')
 
     context = {'form': form, 'topics': topics}
@@ -329,3 +365,79 @@ def set_timezone(request):
         timezone.activate(user_timezone)
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "failed"})
+
+
+@login_required(login_url='login')
+def task_view(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+
+    if request.user not in room.participants.all():
+        messages.error(request, "You are not allowed to view tasks.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        if request.user == room.host:
+            task_title = request.POST.get('task_title')
+            task_description = request.POST.get('task_description')
+            Task.objects.create(title=task_title, description=task_description, user=request.user, room=room)
+            messages.success(request, "Task added successfully!")  # Thông báo thành công khi thêm task
+        else:
+            return HttpResponseForbidden("You are not allowed to add tasks.")
+        return redirect('task_view', room_id=room.id)
+
+    tasks = Task.objects.filter(room=room)
+    return render(request, 'base/task.html', {'tasks': tasks, 'room': room})
+
+@login_required(login_url='login')
+def toggle_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    
+    # Kiểm tra xem người dùng có phải là thành viên của phòng hay không
+    if request.user not in task.room.participants.all():
+        messages.error(request, "You are not allowed to mark tasks as completed.")
+        return redirect('home')
+    
+    if request.user not in task.completed_by.all():
+        task.completed_by.add(request.user)  # Thêm người dùng vào danh sách hoàn thành
+        messages.success(request, "Task marked as completed!")  # Thông báo hoàn thành task
+    else:
+        task.completed_by.remove(request.user)  # Xóa người dùng khỏi danh sách hoàn thành
+        messages.success(request, "Task unmarked as completed!")  # Thông báo bỏ đánh dấu hoàn thành
+    
+    task.save()
+    return redirect('task_view', room_id=task.room.id)
+
+@login_required(login_url='login')
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    
+    if request.user != task.room.host:
+        return HttpResponseForbidden("You are not allowed to delete tasks.")
+    
+    task.delete()
+    messages.success(request, "Task deleted successfully!")  # Thông báo khi task bị xóa
+    return redirect('task_view', room_id=task.room.id)
+
+
+@login_required(login_url='login')
+def callRoom(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+
+    # Kiểm tra xem người dùng có phải là participant không
+    if request.user not in room.participants.all():
+        messages.error(request, "You are not allowed to join this call.")
+        return redirect('home')
+
+    # Kiểm tra xem đã có call room chưa
+    if room.call_room_id is None:
+        room.call_room_id = str(uuid.uuid4())  # Tạo ID duy nhất cho cuộc gọi
+        room.save()
+
+    return render(request, 'base/call_room.html', {'room': room})
+
+@login_required(login_url='login')
+def get_commands(request):
+    commands = [
+        {"command": "/b", "description": "Call the Bot to summarize chat"},
+    ]
+    return JsonResponse(commands, safe=False)

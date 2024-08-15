@@ -1,0 +1,195 @@
+{% extends 'main.html' %} {% block title %}Tasks for {{ room.name }}{% endblock %} {% block content %}
+<style>
+  .todo-container {
+    margin-top: 20px;
+    background-color: #00d9ffd4;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .add-task-form {
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    max-width: 600px; /* Giới hạn chiều rộng tối đa */
+    margin: 0 auto; /* Canh giữa form */
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: #007bff; /* Màu viền khi focus */
+  }
+
+  .task-list {
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    max-width: 600px; /* Giới hạn chiều rộng tối đa */
+    margin-top: 20px;
+  }
+
+  .task-list-item {
+    background-color: #f8f9fac7; /* Màu nền cho mỗi nhiệm vụ */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: box-shadow 0.3s;
+  }
+
+  .task-list-item:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Hiệu ứng hover */
+  }
+
+  .task-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #007bff; /* Màu chữ cho tiêu đề nhiệm vụ */
+    text-decoration: underline; /* Gạch chân chữ */
+  }
+
+  .task-description {
+    color: #995206; /* Màu chữ cho mô tả nhiệm vụ */
+    font-style: italic; /* Đổi kiểu chữ thành nghiêng */
+    font-size: 16px; /* Thay đổi kích thước chữ */
+    font-weight: bold; /* Đổi kiểu chữ thành đậm */
+    line-height: 1.5; /* Thay đổi khoảng cách giữa các dòng */
+    letter-spacing: 0.5px; /* Thay đổi khoảng cách giữa các ký tự */
+    text-transform: capitalize; /* Viết hoa chữ cái đầu tiên của mỗi từ */
+  }
+
+  .task-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-danger {
+    margin-left: 10px;
+  }
+  .add-task-button {
+    background-color: #007bff; /* Background color */
+    color: rgb(46, 8, 75); /* Text color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px 20px; /* Padding */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Transition effects */
+  }
+
+  .add-task-button:hover {
+    background-color: #0056b3; /* Darker background on hover */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Box shadow on hover */
+  }
+
+  .add-task-button:active {
+    background-color: #004085; /* Even darker background on click */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Box shadow on click */
+  }
+
+  @keyframes move {
+    0% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(20px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .task-title-decorated {
+    font-size: 32px; /* Increase font size */
+    font-weight: bold; /* Make the text bold */
+    color: #007bff; /* Change text color */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* Add text shadow */
+    margin-bottom: 20px; /* Add space below the title */
+    text-transform: uppercase; /* Transform text to uppercase */
+    letter-spacing: 1px; /* Increase letter spacing */
+    animation: move 2s infinite ease-in-out;
+  }
+</style>
+
+<div class="todo-container">
+  <h1 class="task-title-decorated">Tasks for {{ room.name }}</h1>
+
+  <div class="d-flex justify-content-center mb-4">
+    {% if request.user == room.host %}
+    <!-- Form to Add New Task -->
+    <form method="POST" class="add-task-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <input
+          type="text"
+          name="task_title"
+          class="form-control"
+          placeholder="Add a new task..."
+          required
+        />
+      </div>
+      <div class="form-group">
+        <textarea
+          name="task_description"
+          class="form-control"
+          placeholder="Add a description (optional)"
+        ></textarea>
+      </div>
+      <button type="submit" class="add-task-button">Add Task</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="task-list">
+    <ul class="list-group">
+      {% for task in tasks %}
+      <li
+        class="list-group-item task-list-item d-flex justify-content-between align-items-start"
+      >
+        <div class="task-content">
+          <h5 class="task-title mb-1">{{ task.title }}</h5>
+          <p class="task-description mb-1">{{ task.description }}</p>
+        </div>
+        <div class="task-actions ml-auto d-flex align-items-center">
+          <form
+            action="{% url 'toggle_task' task.id %}"
+            method="POST"
+            class="d-inline"
+          >
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-success btn-sm mr-2">
+              <input
+                type="checkbox"
+                {% if request.user in task.completed_by.all %}checked{% endif %}
+                disabled
+              />
+              Completed
+            </button>
+          </form>
+          {% if request.user == room.host %}
+          <form
+            action="{% url 'delete_task' task.id %}"
+            method="POST"
+            class="d-inline"
+          >
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
