@@ -1,0 +1,52 @@
+{% extends 'main.html' %} {% load static %} {%block content%}
+
+<main>
+  <div id="join-wrapper">
+    <div style="text-align: center">
+      <h1 id="site-title">Call Room</h1>
+      <h1>Welcome to the call room</h1>
+    </div>
+    <input id="username" type="text" placeholder="Enter your name..." />
+    <button id="join-btn">Join Stream</button>
+  </div>
+  <div id="user-streams"></div>
+
+  <!-- Wrapper for join button -->
+  <div id="footer">
+    <div class="icon-wrapper">
+      <img
+        class="control-icon"
+        id="camera-btn"
+        src="{% static 'images/video.svg' %}"
+      />
+      <p>Cam</p>
+    </div>
+
+    <div class="icon-wrapper">
+      <img
+        class="control-icon"
+        id="mic-btn"
+        src="{% static 'images/microphone.svg' %}"
+      />
+      <p>Mic</p>
+    </div>
+
+    <div class="icon-wrapper">
+      <img
+        class="control-icon"
+        id="leave-btn"
+        src="{% static 'images/leave.svg' %}"
+      />
+      <p>Leave</p>
+    </div>
+  </div>
+</main>
+
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+<script>
+  const volumeOnIcon = "{% static 'images/volume-on.svg' %}";
+  const volumeOffIcon = "{% static 'images/volume-off.svg' %}";
+</script>
+<script src="{% static 'js/script1.js' %}"></script>
+
+{% endblock content %}

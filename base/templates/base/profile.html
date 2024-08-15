@@ -18,6 +18,7 @@
         <div class="profile__info">
           <h3>{{user.name}}</h3>
           <p>@{{user.username}}</p>
+          <p>Date Of Birth: {{user.birth_date}}</p>
           {% if request.user == user %}
           <a href="{% url 'update-user' %}" class="btn btn--main btn--pill">Edit Profile</a>
           {% endif %}
