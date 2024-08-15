@@ -12,23 +12,18 @@ from django.http import JsonResponse, HttpResponseForbidden
 from .models import Message
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from transformers import pipeline
-
-
-from diffusers import StableDiffusionPipeline
+import requests
+import google.generativeai as genai
 from django.conf import settings
 import re, os
-
 from django.utils import timezone
 import pytz
-
 import uuid
-
+import io
+from PIL import Image
+import base64
 from dotenv import load_dotenv
-import os
-
-# Load environment variables from .env file
-load_dotenv()
+load_dotenv() 
 
 def loginPage(request):
     page = 'login'
@@ -105,14 +100,6 @@ def home(request):
                'room_count': room_count, 'room_messages': room_messages}
     return render(request, 'base/home.html', context)
 
-# Load the summarization pipeline and Stable Diffusion pipeline
-huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
-image_model = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", use_auth_token=huggingface_token)
-image_model.to("cpu")
-
-# Set summarizer to CPU
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=-1, clean_up_tokenization_spaces=False)
-
 @login_required(login_url='login')
 def room(request, pk):
     room = Room.objects.get(id=pk)
@@ -181,6 +168,9 @@ def room(request, pk):
     }
     return render(request, 'base/room.html', context)
 
+GOOGLE_API_KEY=os.getenv('GOOGLE_API_KEY')
+genai.configure(api_key=GOOGLE_API_KEY)
+
 def summarize_chat(messages, start_time, end_time):
     # Convert to timezone-aware datetime if needed
     start_time = timezone.make_aware(start_time) if timezone.is_naive(start_time) else start_time
@@ -197,36 +187,82 @@ def summarize_chat(messages, start_time, end_time):
     
     if not text.strip():
         return "No content to summarize."
-
-    try:
-        # Generate the summary using the Hugging Face model
-        summary = summarizer(text, max_length=150, min_length=30, do_sample=False)
-        summary_text = summary[0]['summary_text'].strip()
-        return summary_text
-    
-    except Exception as e:
-        return f"Error summarizing content: {str(e)}"
-    
-def generate_image_from_summary(summary):
-    max_length = 128  # Example maximum length
-    sanitized_summary = re.sub(r'[\\/:*?"<>|,]+', '', summary)
-    truncated_summary = sanitized_summary[:max_length]
-    filename = re.sub(r'\s+', '_', truncated_summary) + '.png'
-    save_dir = os.path.join(settings.BASE_DIR, 'static', 'images')
-    
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+   
+    model = genai.GenerativeModel("gemini-pro")
+    chat = model.start_chat()
         
-    outputfile = os.path.join(save_dir, filename)
+    prompt = f"Please summarize the content of this chat:\n{text}"
+        
+    response = chat.send_message(prompt)
     
-    # Generate the image
-    image = image_model(summary, num_inference_steps=500)["images"][0]
+    print(response)
+        
+    try:
+        summarized_text = response.text  # Accessing the text summary assuming 'text' is an attribute
+    except AttributeError:
+        # Handle the case where 'text' is not an attribute of the response
+        summarized_text = "Could not retrieve summarized text."
+
+    return summarized_text
     
-    # Save the image
-    image.save(outputfile)
     
-    # Return the relative URL
-    return f'images/{filename}'
+
+def generate_image_from_summary(prompt):
+    api_url = "https://modelslab.com/api/v6/images/text2img"
+    api_key = os.getenv('MODEL_LAB_API_KEY') 
+
+    payload = {
+        "key": api_key,
+        "model_id": "sdxl",
+        "prompt": prompt,
+        "width": "256",
+        "height": "256",
+        "samples": "1",
+        "num_inference_steps": "41",
+        "guidance_scale": 7.5,
+        "scheduler": "UniPCMultistepScheduler",
+        "seed": None,
+        "webhook": None,
+        "track_id": None
+    }
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(api_url, headers=headers, json=payload)
+
+    if response.status_code == 200:
+        response_json = response.json()
+        print("API Response:", response_json)  # Debugging line
+        
+        if 'output' in response_json:
+            image_url = response_json['output'][0]
+            image_response = requests.get(image_url)
+
+            if image_response.status_code == 200:
+                image = Image.open(io.BytesIO(image_response.content))
+                save_dir = os.path.join(settings.BASE_DIR, 'static', 'images')
+                if not os.path.exists(save_dir):
+                    os.makedirs(save_dir)
+
+                # Sanitize and create filename
+                max_length = 128
+                sanitized_prompt = re.sub(r'[\\/:*?"<>|,]+', '', prompt)
+                truncated_prompt = sanitized_prompt[:max_length]
+                filename = re.sub(r'\s+', '_', truncated_prompt) + '.png'
+
+                outputfile = os.path.join(save_dir, filename)
+                print("Saving image to:", outputfile)  # Debugging line
+                image.save(outputfile, 'PNG')
+
+                return f'images/{filename}'
+            else:
+                print("Failed to download image from URL:", image_url)
+    else:
+        print("API Request failed with status:", response.status_code)
+
+    return None
 
 
 def userProfile(request, pk):
@@ -447,3 +483,5 @@ def get_commands(request):
         {"command": "/b", "description": "Call the Bot to summarize chat"},
     ]
     return JsonResponse(commands, safe=False)
+
+
