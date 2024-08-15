@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,8 +25,9 @@ SECRET_KEY = 'django-insecure-3#av2c6nptlbbb6^muqkchu&fe3wv&n$t2+g$v!ir-f5%doocb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
+
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -56,7 +56,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'base.middleware.TimezoneMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 
 ]
 
@@ -137,12 +136,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 MEDIA_ROOT = BASE_DIR / 'static/images'
-
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # STATIC_ROOT =
 
