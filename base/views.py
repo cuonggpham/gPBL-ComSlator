@@ -24,6 +24,12 @@ import pytz
 
 import uuid
 
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
 def loginPage(request):
     page = 'login'
     if request.user.is_authenticated:
@@ -100,8 +106,8 @@ def home(request):
     return render(request, 'base/home.html', context)
 
 # Load the summarization pipeline and Stable Diffusion pipeline
-os.environ["HUGGINGFACE_TOKEN"] = "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"
-image_model = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", use_auth_token=os.getenv('HUGGINGFACE_TOKEN'))
+huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
+image_model = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", use_auth_token=huggingface_token)
 image_model.to("cpu")
 
 # Set summarizer to CPU
