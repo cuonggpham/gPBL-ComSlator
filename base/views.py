@@ -204,7 +204,8 @@ def summarize_chat(messages, start_time, end_time):
 
     return summarized_text
     
-    
+import sqlite3
+print(sqlite3.sqlite_version)    
 
 def generate_image_from_summary(prompt):
     api_url = "https://modelslab.com/api/v6/images/text2img"
