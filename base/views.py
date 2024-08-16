@@ -209,7 +209,7 @@ def summarize_chat(messages, start_time, end_time):
 
 def generate_image_from_summary(prompt):
     api_url = "https://modelslab.com/api/v6/images/text2img"
-    api_key = os.getenv('MODEL_LAB_API_KEY') 
+    api_key = os.getenv('MODEL_LAB_API_KEY')
 
     payload = {
         "key": api_key,
