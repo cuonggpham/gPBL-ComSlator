@@ -72,12 +72,19 @@
         <h2 class="auth__tagline">Comslator - Connect us closer</h2>
 
         <form class="form" action="" method="POST">
-          {% csrf_token %} {% for field in form %}
+          {% csrf_token %}
           <div class="form__group form__group">
-            <label for="room_name">{{field.label}}</label>
-            {{field}}
+            <label for="room_name">{{ form.name.label_tag }}</label>
+            {{ form.name }}
+            <label for="room_name">{{ form.username.label_tag }}</label>
+            {{ form.username }}
+            <label for="room_name">{{ form.email.label_tag }}</label>
+            {{ form.email }}
+            <label for="room_name">{{ form.password1.label_tag }}</label>
+            {{ form.password1 }}
+            <label for="room_name">{{ form.password2.label_tag }}</label>
+            {{ form.password2 }}
           </div>
-          {% endfor %}
 
           <button class="btn btn--main" type="submit">
             <svg

@@ -1,13 +1,13 @@
 //#1
 let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
+require("dotenv").config();
 //#2
 let config = {
-  appid: "4d2e0f8bdb57489d9f119adc6f30d47c",
-  token:
-    "007eJxTYHCfPqOYM+PY7HdpEZe3ftlsUsnL/0/lMDN33JSdB/Wvf7ymwGCSYpRqkGaRlJJkam5iYZlimWZoaJmYkmyWZmyQYmKebFS6N60hkJHB7u4mBkYoBPFZGHITM/MYGAClXSDh",
+  appid: "AGORA_ID",
+  token: "AGORA_TOKEN",
   uid: null,
-  channel: "main",
+  channel: "Last",
 };
 
 //#3 - Setting tracks for when user joins
