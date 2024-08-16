@@ -1,11 +1,11 @@
 //#1
 let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
-require("dotenv").config();
 //#2
 let config = {
-  appid: "AGORA_ID",
-  token: "AGORA_TOKEN",
+  appid: "a18b873fa00347d480d748db951eb799",
+  token:
+    "007eJxTYMiLC/VaULLq+L9rj1ecOJem5KZTKFA1rW+rx4l7NQv++7YqMCQaWiRZmBunJRoYGJuYp5hYGKSYm1ikJFmaGqYmmVtaWi7dl9YQyMhgfmgnEyMDBIL4LAw+icUlDAwA3qYhNA==",
   uid: null,
   channel: "Last",
 };
@@ -26,7 +26,7 @@ let localTrackState = {
 let remoteTracks = {};
 
 document.getElementById("join-btn").addEventListener("click", async () => {
-  config.uid = document.getElementById("username").value;
+  config.uid = document.getElementById("task-username").value;
   await joinStreams();
   document.getElementById("join-wrapper").style.display = "none";
   document.getElementById("footer").style.display = "flex";

@@ -168,8 +168,7 @@ def room(request, pk):
     }
     return render(request, 'base/room.html', context)
 
-GOOGLE_API_KEY=os.getenv('GOOGLE_API_KEY')
-genai.configure(api_key=GOOGLE_API_KEY)
+genai.configure(api_key='AIzaSyBcvTfnV36wUkhSXoSGQDQHfIwHfglUbpA')
 
 def summarize_chat(messages, start_time, end_time):
     # Convert to timezone-aware datetime if needed
@@ -209,7 +208,7 @@ def summarize_chat(messages, start_time, end_time):
 
 def generate_image_from_summary(prompt):
     api_url = "https://modelslab.com/api/v6/images/text2img"
-    api_key = os.getenv('MODEL_LAB_API_KEY')
+    api_key = 'p8J3ejMgg6zJqXnvfUkCnSZnrMltRKMWIDwsMOgC55HRkJsvb3FIuQcdWsfJ'
 
     payload = {
         "key": api_key,
