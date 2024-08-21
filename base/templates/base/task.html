@@ -1,11 +1,12 @@
-{% extends 'main.html' %} {% block title %}Tasks for {{ room.name }}{% endblock %} {% block content %}
+{% extends 'main.html' %} {% block title %}Tasks for {{ room.name }}
+{%endblock%} {% block content %}
 <style>
   .todo-container {
     margin-top: 20px;
-    background-color: #00d9ffd4;
+    {% comment %} background-color: #00d9ffd4; {% endcomment %}
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    {% comment %} box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); {% endcomment %}
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -39,8 +40,8 @@
   }
 
   .task-list-item {
-    background-color: #f8f9fac7; /* Màu nền cho mỗi nhiệm vụ */
-    border: 1px solid #ddd;
+    background-color: #e5e5e5; /* Màu nền cho mỗi nhiệm vụ */
+    border: 1px solid #e5e5e5;
     border-radius: 5px;
     padding: 15px;
     margin-bottom: 10px;
@@ -52,16 +53,20 @@
   }
 
   .task-title {
+    font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     font-size: 18px;
     font-weight: bold;
-    color: #007bff; /* Màu chữ cho tiêu đề nhiệm vụ */
+    color: #2d2d39; /* Màu chữ cho tiêu đề nhiệm vụ */
     text-decoration: underline; /* Gạch chân chữ */
   }
 
   .task-description {
-    color: #995206; /* Màu chữ cho mô tả nhiệm vụ */
+    font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    color: #3f4156; /* Màu chữ cho mô tả nhiệm vụ */
     font-style: italic; /* Đổi kiểu chữ thành nghiêng */
-    font-size: 16px; /* Thay đổi kích thước chữ */
+    font-size: 14px; /* Thay đổi kích thước chữ */
     font-weight: bold; /* Đổi kiểu chữ thành đậm */
     line-height: 1.5; /* Thay đổi khoảng cách giữa các dòng */
     letter-spacing: 0.5px; /* Thay đổi khoảng cách giữa các ký tự */
@@ -77,14 +82,16 @@
     margin-left: 10px;
   }
   .add-task-button {
-    background-color: #007bff; /* Background color */
-    color: rgb(46, 8, 75); /* Text color */
+    font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background-color: #71c6dd; /* Background color */
+    color: black; /* Text color */
     border: none; /* Remove border */
     border-radius: 5px; /* Rounded corners */
     padding: 10px 20px; /* Padding */
-    font-size: 16px; /* Font size */
+    font-size: 14px; /* Font size */
     cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s, box-shadow 0.3s; /* Transition effects */
+    {% comment %} transition: background-color 0.3s, box-shadow 0.3s; /* Transition effects */ {% endcomment %}
   }
 
   .add-task-button:hover {
@@ -112,17 +119,17 @@
   .task-title-decorated {
     font-size: 32px; /* Increase font size */
     font-weight: bold; /* Make the text bold */
-    color: #007bff; /* Change text color */
+    color: #71c6dd; /* Change text color */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* Add text shadow */
     margin-bottom: 20px; /* Add space below the title */
     text-transform: uppercase; /* Transform text to uppercase */
     letter-spacing: 1px; /* Increase letter spacing */
-    animation: move 2s infinite ease-in-out;
   }
 </style>
 
 <div class="todo-container">
-  <h1 class="task-title-decorated">Tasks for {{ room.name }}</h1>
+  <h1 class="task-title-decorated">Tasks for Room: "{{ room.name }}"</h1>
+  <h3>Host: {{room.host.name}}</h3>
 
   <div class="d-flex justify-content-center mb-4">
     {% if request.user == room.host %}
@@ -170,7 +177,14 @@
             <button type="submit" class="btn btn-outline-success btn-sm mr-2">
               <input
                 type="checkbox"
-                {% if request.user in task.completed_by.all %}checked{% endif %}
+                {%
+                if
+                request.user
+                in
+                task.completed_by.all
+                %}checked{%
+                endif
+                %}
                 disabled
               />
               Completed
