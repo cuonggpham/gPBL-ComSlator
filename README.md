@@ -26,35 +26,30 @@ ComSlator is a web application designed to provide real-time translation and oth
 
 Follow these steps to set up the project on your local machine:
 
-# Clone the repository using the command below:
+1. **Clone the repository using the command below:**
+   
+        git clone https://github.com/AL23075/Comslator.git
+2. **Move into the directory where the project files are located:**
+    
+        cd Comslator
+3. **Create a virtual environment:**
+   
+        # Let's install virtualenv first
+        pip install virtualenv
 
-    git clone https://github.com/AL23075/Comslator.git
+        # Then we create our virtual environment
+        virtualenv envname
+4. **Activate the virtual environment:**
 
-# Move into the directory where the project files are located:
+        # On Windows
+        envname\scripts\activate
 
-    cd Comslator
-
-# Create a virtual environment:
-
-    # Let's install virtualenv first
-    pip install virtualenv
-
-    # Then we create our virtual environment
-    virtualenv envname
-
-# Activate the virtual environment:
-
-    # On Windows
-    envname\scripts\activate
-
-    # On Unix or MacOS
-    source envname/bin/activate
-
-# Install the required packages:
-
-    pip install -r requirements.txt
-
-## Running the App
+        # On Unix or MacOS
+        source envname/bin/activate
+5. **Install the required packages:**
+   
+        pip install -r requirements.txt
+7. **Running the App:**
 
 To run the app, use the following command:
 
