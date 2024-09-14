@@ -116,7 +116,7 @@ def room(request, pk):
 
     if request.method == 'POST':
         body = request.POST.get('body')
-        if body.startswith('/b'):  # Bot command detected
+        if body.startswith('/s'):  # Bot command detected
             form = SummarizeForm(request.POST)
             if form.is_valid():
                 start_time = form.cleaned_data['start_time']
@@ -139,13 +139,14 @@ def room(request, pk):
 
                 summary = summarize_chat(room_messages, start_time_utc, end_time_utc)
                 
-                relative_image_path = generate_image_from_summary(summary)
+                chatbot_user = User.objects.get(username='chatbot')
+                # relative_image_path = generate_image_from_summary(summary)
                 
                 Message.objects.create(
-                    user=request.user,
+                    user=chatbot_user,
                     room=room,
                     body=f"Summary:\n{summary}",
-                    image=relative_image_path,
+                    # image=relative_image_path,
                 )
             return redirect('room', pk=room.id)
         else:  # Regular message
@@ -168,7 +169,10 @@ def room(request, pk):
     }
     return render(request, 'base/room.html', context)
 
-genai.configure(api_key='AIzaSyBcvTfnV36wUkhSXoSGQDQHfIwHfglUbpA')
+
+genai_api_key = os.getenv('GENAI_API_KEY')
+
+genai.configure(api_key=genai_api_key)
 
 def summarize_chat(messages, start_time, end_time):
     # Convert to timezone-aware datetime if needed
@@ -207,9 +211,11 @@ def summarize_chat(messages, start_time, end_time):
 import sqlite3
 print(sqlite3.sqlite_version)    
 
+image_api_key = os.getenv('IMAGE_API_KEY')
+
 def generate_image_from_summary(prompt):
     api_url = "https://modelslab.com/api/v6/images/text2img"
-    api_key = 'p8J3ejMgg6zJqXnvfUkCnSZnrMltRKMWIDwsMOgC55HRkJsvb3FIuQcdWsfJ' 
+    api_key = image_api_key
 
     payload = {
         "key": api_key,
